@@ -1,0 +1,16 @@
+name: paddle
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - paddlepaddle==3.0.0
+    - paddleocr>=2.9.0
+    - flask>=3.0.0
+    - flask-cors>=4.0.0
+    - pillow>=10.0.0
+    - opencv-python-headless>=4.8.0
+    - numpy>=1.24.0
+    - requests>=2.31.0

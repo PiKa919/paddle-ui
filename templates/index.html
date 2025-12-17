@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaddleOCR Studio</title>
+    <meta name="description"
+        content="AI-powered OCR engine with PaddleOCR - Extract text from images with advanced model management">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <span>PaddleOCR Studio</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="ocr">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    OCR
+                </button>
+                <button class="tab-btn" data-tab="structure">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Structure
+                </button>
+                <button class="tab-btn" data-tab="vl">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M2 12h20" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                    VL (109 Lang)
+                </button>
+                <button class="tab-btn" data-tab="models">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                        <line x1="12" y1="22.08" x2="12" y2="12" />
+                    </svg>
+                    Models
+                </button>
+            </nav>
+            <div class="header-actions">
+                <span class="status-badge" id="status-badge">
+                    <span class="status-dot"></span>
+                    CPU Mode
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- OCR Tab -->
+            <section class="tab-content active" id="ocr-tab">
+                <div class="ocr-layout">
+                    <!-- Left Panel: Image Upload & Preview -->
+                    <div class="panel upload-panel">
+                        <div class="panel-header">
+                            <h2>Image</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-icon" id="clear-btn" title="Clear" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="drop-zone">
+                            <div class="drop-zone-content">
+                                <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <p class="drop-text">Drop image here or <span class="browse-link">browse</span></p>
+                                <p class="drop-hint">Supports PNG, JPG, GIF, WebP, TIFF</p>
+                            </div>
+                            <input type="file" id="file-input" accept="image/*" hidden>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="image-preview" id="image-preview" style="display: none;">
+                            <canvas id="preview-canvas"></canvas>
+                            <div class="image-info" id="image-info"></div>
+                        </div>
+
+                        <!-- Preprocessing Controls -->
+                        <div class="controls-section" id="controls-section" style="display: none;">
+                            <h3>Adjustments</h3>
+                            <div class="control-group">
+                                <label>
+                                    <span>Brightness</span>
+                                    <span class="value" id="brightness-value">100%</span>
+                                </label>
+                                <input type="range" id="brightness" min="20" max="200" value="100">
+                            </div>
+                            <div class="control-group">
+                                <label>
+                                    <span>Contrast</span>
+                                    <span class="value" id="contrast-value">100%</span>
+                                </label>
+                                <input type="range" id="contrast" min="20" max="200" value="100">
+                            </div>
+                            <div class="control-group">
+                                <label>
+                                    <span>Saturation</span>
+                                    <span class="value" id="saturation-value">100%</span>
+                                </label>
+                                <input type="range" id="saturation" min="0" max="200" value="100">
+                            </div>
+                            <div class="control-group">
+                                <label>
+                                    <span>Sharpness</span>
+                                    <span class="value" id="sharpness-value">100%</span>
+                                </label>
+                                <input type="range" id="sharpness" min="0" max="200" value="100">
+                            </div>
+                            <div class="control-row">
+                                <button class="btn btn-sm" id="reset-adjustments">Reset All</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Action Area -->
+                    <div class="action-area">
+                        <div class="ocr-settings">
+                            <div class="setting-group">
+                                <label for="lang-select">Language</label>
+                                <select id="lang-select">
+                                    <option value="en">English</option>
+                                    <option value="ch">Chinese (Simplified)</option>
+                                    <option value="chinese_cht">Chinese (Traditional)</option>
+                                    <option value="korean">Korean</option>
+                                    <option value="japan">Japanese</option>
+                                    <option value="arabic">Arabic</option>
+                                    <option value="latin">Latin</option>
+                                    <option value="cyrillic">Cyrillic</option>
+                                    <option value="devanagari">Hindi/Devanagari</option>
+                                    <option value="ta">Tamil</option>
+                                    <option value="te">Telugu</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <label for="version-select">Model Version</label>
+                                <select id="version-select">
+                                    <option value="PP-OCRv5">PP-OCRv5 (Latest)</option>
+                                    <option value="PP-OCRv4">PP-OCRv4</option>
+                                    <option value="PP-OCRv3">PP-OCRv3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-large" id="ocr-btn" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="M21 21l-4.35-4.35" />
+                            </svg>
+                            Run OCR
+                        </button>
+                        <div class="ocr-progress" id="ocr-progress" style="display: none;">
+                            <div class="spinner"></div>
+                            <span>Processing...</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Results -->
+                    <div class="panel results-panel">
+                        <div class="panel-header">
+                            <h2>Results</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-icon" id="copy-btn" title="Copy Text" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                    </svg>
+                                </button>
+                                <button class="btn btn-icon" id="download-btn" title="Download JSON" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Results Content -->
+                        <div class="results-content">
+                            <div class="results-empty" id="results-empty">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                </svg>
+                                <p>Upload an image and run OCR to see results</p>
+                            </div>
+
+                            <div class="results-data" id="results-data" style="display: none;">
+                                <div class="result-tabs">
+                                    <button class="result-tab active" data-result="text">Text</button>
+                                    <button class="result-tab" data-result="boxes">Boxes</button>
+                                    <button class="result-tab" data-result="json">JSON</button>
+                                </div>
+
+                                <div class="result-content active" id="text-result">
+                                    <div class="text-output" id="text-output"></div>
+                                </div>
+
+                                <div class="result-content" id="boxes-result">
+                                    <div class="boxes-list" id="boxes-list"></div>
+                                </div>
+
+                                <div class="result-content" id="json-result">
+                                    <pre class="json-output" id="json-output"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Structure Tab -->
+            <section class="tab-content" id="structure-tab">
+                <div class="ocr-layout">
+                    <!-- Left Panel: Image Upload & Preview -->
+                    <div class="panel upload-panel">
+                        <div class="panel-header">
+                            <h2>Document</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-icon" id="structure-clear-btn" title="Clear" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="structure-drop-zone">
+                            <div class="drop-zone-content">
+                                <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <p class="drop-text">Drop document/image here or <span class="browse-link">browse</span>
+                                </p>
+                                <p class="drop-hint">Extracts tables, formulas, charts, seals</p>
+                            </div>
+                            <input type="file" id="structure-file-input" accept="image/*,.pdf" hidden>
+                        </div>
+
+                        <!-- Image Preview with Layout Overlay -->
+                        <div class="image-preview" id="structure-preview" style="display: none;">
+                            <canvas id="structure-canvas"></canvas>
+                            <div class="image-info" id="structure-info"></div>
+                        </div>
+
+                        <!-- Layout Legend -->
+                        <div class="layout-legend" id="layout-legend" style="display: none;">
+                            <h3>Layout Elements</h3>
+                            <div class="legend-items">
+                                <span class="legend-item"><span class="legend-color"
+                                        style="background: #6366f1;"></span>Text</span>
+                                <span class="legend-item"><span class="legend-color"
+                                        style="background: #f59e0b;"></span>Title</span>
+                                <span class="legend-item"><span class="legend-color"
+                                        style="background: #ef4444;"></span>Table</span>
+                                <span class="legend-item"><span class="legend-color"
+                                        style="background: #8b5cf6;"></span>Formula</span>
+                                <span class="legend-item"><span class="legend-color"
+                                        style="background: #14b8a6;"></span>Chart</span>
+                                <span class="legend-item"><span class="legend-color"
+                                        style="background: #f97316;"></span>Seal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Action Area -->
+                    <div class="action-area">
+                        <div class="ocr-settings">
+                            <div class="setting-group">
+                                <label for="structure-lang-select">Language</label>
+                                <select id="structure-lang-select">
+                                    <option value="ch">Chinese + English</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-large" id="structure-btn" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="14" y="14" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                            Parse Document
+                        </button>
+                        <div class="ocr-progress" id="structure-progress" style="display: none;">
+                            <div class="spinner"></div>
+                            <span>Analyzing document...</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Results -->
+                    <div class="panel results-panel">
+                        <div class="panel-header">
+                            <h2>Parsed Content</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-icon" id="export-md-btn" title="Export Markdown" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                </button>
+                                <button class="btn btn-icon" id="export-json-btn" title="Export JSON" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Structure Results Content -->
+                        <div class="results-content">
+                            <div class="results-empty" id="structure-results-empty">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="7" height="7" />
+                                    <rect x="14" y="3" width="7" height="7" />
+                                    <rect x="14" y="14" width="7" height="7" />
+                                    <rect x="3" y="14" width="7" height="7" />
+                                </svg>
+                                <p>Upload a document to extract structure</p>
+                            </div>
+
+                            <div class="results-data" id="structure-results" style="display: none;">
+                                <div class="result-tabs">
+                                    <button class="result-tab active" data-structure-result="markdown">Markdown</button>
+                                    <button class="result-tab" data-structure-result="tables">Tables</button>
+                                    <button class="result-tab" data-structure-result="formulas">Formulas</button>
+                                    <button class="result-tab" data-structure-result="json">JSON</button>
+                                </div>
+
+                                <div class="result-content active" id="markdown-result">
+                                    <div class="markdown-preview" id="markdown-output"></div>
+                                </div>
+
+                                <div class="result-content" id="tables-result">
+                                    <div class="tables-list" id="tables-output"></div>
+                                </div>
+
+                                <div class="result-content" id="formulas-result">
+                                    <div class="formulas-list" id="formulas-output"></div>
+                                </div>
+
+                                <div class="result-content" id="structure-json-result">
+                                    <pre class="json-output" id="structure-json-output"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VL Tab -->
+            <section class="tab-content" id="vl-tab">
+                <div class="ocr-layout">
+                    <!-- Left Panel: Image Upload & Preview -->
+                    <div class="panel upload-panel">
+                        <div class="panel-header">
+                            <h2>Document</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-icon" id="vl-clear-btn" title="Clear" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="vl-drop-zone">
+                            <div class="drop-zone-content">
+                                <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M2 12h20" />
+                                    <path
+                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                </svg>
+                                <p class="drop-text">Drop image here or <span class="browse-link">browse</span></p>
+                                <p class="drop-hint">Vision-Language model • 109 languages</p>
+                            </div>
+                            <input type="file" id="vl-file-input" accept="image/*" hidden>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="image-preview" id="vl-preview" style="display: none;">
+                            <canvas id="vl-canvas"></canvas>
+                            <div class="image-info" id="vl-info"></div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Action Area -->
+                    <div class="action-area">
+                        <div class="vl-info">
+                            <div class="info-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M2 12h20" />
+                                </svg>
+                                <span>109 Languages Supported</span>
+                            </div>
+                            <p class="info-text">PaddleOCR-VL uses a 0.9B Vision-Language Model for SOTA document
+                                parsing.</p>
+                        </div>
+                        <button class="btn btn-primary btn-large" id="vl-btn" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M2 12h20" />
+                            </svg>
+                            Parse with VL
+                        </button>
+                        <div class="ocr-progress" id="vl-progress" style="display: none;">
+                            <div class="spinner"></div>
+                            <span>VL model processing...</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Results -->
+                    <div class="panel results-panel">
+                        <div class="panel-header">
+                            <h2>VL Results</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-icon" id="vl-export-btn" title="Export" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- VL Results Content -->
+                        <div class="results-content">
+                            <div class="results-empty" id="vl-results-empty">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M2 12h20" />
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10" />
+                                </svg>
+                                <p>Upload an image to parse with VL model</p>
+                            </div>
+
+                            <div class="results-data" id="vl-results" style="display: none;">
+                                <div class="result-tabs">
+                                    <button class="result-tab active" data-vl-result="text">Text</button>
+                                    <button class="result-tab" data-vl-result="markdown">Markdown</button>
+                                    <button class="result-tab" data-vl-result="json">JSON</button>
+                                </div>
+
+                                <div class="result-content active" id="vl-text-result">
+                                    <div class="text-output" id="vl-text-output"></div>
+                                </div>
+
+                                <div class="result-content" id="vl-markdown-result">
+                                    <div class="markdown-preview" id="vl-markdown-output"></div>
+                                </div>
+
+                                <div class="result-content" id="vl-json-result">
+                                    <pre class="json-output" id="vl-json-output"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Models Tab -->
+            <section class="tab-content" id="models-tab">
+                <div class="models-layout">
+                    <div class="models-header">
+                        <h2>Model Management</h2>
+                        <div class="models-stats">
+                            <span class="stat">
+                                <strong id="installed-count">0</strong> installed
+                            </span>
+                            <span class="stat">
+                                <strong id="disk-usage">0 MB</strong> used
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="models-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="detection">Detection</button>
+                        <button class="filter-btn" data-filter="recognition">Recognition</button>
+                        <button class="filter-btn" data-filter="installed">Installed</button>
+                    </div>
+
+                    <div class="models-grid" id="models-grid">
+                        <div class="loading-models">
+                            <div class="spinner"></div>
+                            <span>Loading models...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>
