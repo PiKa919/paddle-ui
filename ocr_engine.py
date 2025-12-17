@@ -10,14 +10,14 @@ import numpy as np
 class OCREngine:
     """Wrapper around PaddleOCR for CPU-only inference"""
     
-    # Supported languages and their codes
+    # Supported languages and their codes (PaddleOCR 3.x compatible)
     LANGUAGES = {
         'ch': 'Chinese (Simplified)',
         'en': 'English', 
         'chinese_cht': 'Chinese (Traditional)',
         'korean': 'Korean',
         'japan': 'Japanese',
-        'arabic': 'Arabic',
+        'ar': 'Arabic',  # Changed from 'arabic' to 'ar'
         'latin': 'Latin',
         'cyrillic': 'Cyrillic',
         'devanagari': 'Devanagari',
@@ -29,7 +29,7 @@ class OCREngine:
         'spanish': 'Spanish',
         'italian': 'Italian',
         'portuguese': 'Portuguese',
-        'russian': 'Russian',
+        'ru': 'Russian',  # Changed from 'russian' to 'ru'
         'hi': 'Hindi',
         'mr': 'Marathi',
     }
@@ -88,41 +88,48 @@ class OCREngine:
         texts = []
         
         for res in result:
-            if hasattr(res, 'rec_polys') and hasattr(res, 'rec_texts'):
-                # PP-OCRv5 result format
-                if res.rec_polys is not None and res.rec_texts is not None:
-                    for i, (poly, text, score) in enumerate(zip(
-                        res.rec_polys, res.rec_texts, res.rec_scores or [1.0] * len(res.rec_texts)
-                    )):
-                        if poly is not None:
-                            poly_list = poly.tolist() if isinstance(poly, np.ndarray) else poly
-                            boxes.append({
-                                'points': poly_list,
-                                'text': text,
-                                'confidence': float(score) if score else 1.0
-                            })
-                            texts.append({
-                                'text': text,
-                                'confidence': float(score) if score else 1.0
-                            })
-            elif hasattr(res, 'dt_polys') and hasattr(res, 'rec_texts'):
-                # Alternative format handling
-                if res.dt_polys is not None:
-                    rec_texts = res.rec_texts or []
-                    rec_scores = res.rec_scores or []
-                    for i, poly in enumerate(res.dt_polys):
+            # Helper function to get value from result (supports both dict and attribute access)
+            def get_value(obj, key, default=None):
+                if isinstance(obj, dict) or hasattr(obj, 'keys'):
+                    return obj.get(key, default)
+                return getattr(obj, key, default)
+            
+            rec_polys = get_value(res, 'rec_polys')
+            rec_texts = get_value(res, 'rec_texts')
+            rec_scores = get_value(res, 'rec_scores')
+            dt_polys = get_value(res, 'dt_polys')
+            
+            # Try rec_polys first (PP-OCRv5 format)
+            if rec_polys is not None and rec_texts is not None:
+                scores = rec_scores if rec_scores is not None else [1.0] * len(rec_texts)
+                for i, (poly, text, score) in enumerate(zip(rec_polys, rec_texts, scores)):
+                    if poly is not None:
                         poly_list = poly.tolist() if isinstance(poly, np.ndarray) else poly
-                        text = rec_texts[i] if i < len(rec_texts) else ''
-                        score = rec_scores[i] if i < len(rec_scores) else 1.0
                         boxes.append({
                             'points': poly_list,
                             'text': text,
-                            'confidence': float(score)
+                            'confidence': float(score) if score else 1.0
                         })
                         texts.append({
                             'text': text,
-                            'confidence': float(score)
+                            'confidence': float(score) if score else 1.0
                         })
+            # Fallback to dt_polys (alternative format)
+            elif dt_polys is not None and rec_texts is not None:
+                scores = rec_scores if rec_scores is not None else []
+                for i, poly in enumerate(dt_polys):
+                    poly_list = poly.tolist() if isinstance(poly, np.ndarray) else poly
+                    text = rec_texts[i] if i < len(rec_texts) else ''
+                    score = scores[i] if i < len(scores) else 1.0
+                    boxes.append({
+                        'points': poly_list,
+                        'text': text,
+                        'confidence': float(score)
+                    })
+                    texts.append({
+                        'text': text,
+                        'confidence': float(score)
+                    })
         
         return {
             'boxes': boxes,
