@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.log
+*.tmp
+uploads/
+output/
+
+# Documentation
+*.md
+!README.md
+
+# Model files (will be downloaded at runtime)
+*.pdmodel
+*.pdiparams
+*.tar
+*.tar.gz
+
+# Test files
+image.png
+environment.yml

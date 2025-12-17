@@ -58,6 +58,25 @@ python app.py
 
 Open http://localhost:5000 in your browser.
 
+### 🐳 Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/paddle-ui.git
+cd paddle-ui
+
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Or build manually
+docker build -t paddle-ui .
+docker run -p 5000:5000 -v paddleocr-models:/root/.paddleocr paddle-ui
+```
+
+Open http://localhost:5000 in your browser.
+
+> **Note**: First run will download PaddleOCR models (~500MB). Models are persisted in a Docker volume.
+
 ## 📁 Project Structure
 
 ```

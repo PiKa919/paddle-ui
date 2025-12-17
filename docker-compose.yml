@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  paddleocr-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: paddleocr-studio
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persist downloaded models
+      - paddleocr-models:/root/.paddleocr
+      # Optional: mount local uploads directory
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISABLE_MODEL_SOURCE_CHECK=True
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  paddleocr-models:
+    driver: local
