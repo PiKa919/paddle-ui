@@ -109,7 +109,17 @@ paddle-ui/
 
 ## 🖼️ Screenshots
 
-*Coming soon*
+### OCR Mode
+![OCR Tab](screenshots/ocr_tab.png)
+
+### Structure Mode (PP-StructureV3)
+![Structure Tab](screenshots/structure_tab.png)
+
+### VL Mode (PaddleOCR-VL)
+![VL Tab](screenshots/vl_tab.png)
+
+### Model Management
+![Models Tab](screenshots/models_tab.png)
 
 ## 📝 License
 
