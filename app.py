@@ -24,7 +24,7 @@ CORS(app)
 # Configuration
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32MB max upload
 app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'tiff'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'tiff', 'pdf'}
 
 # Initialize components
 ocr_engine = None
@@ -515,6 +515,8 @@ if __name__ == '__main__':
     print("=" * 50)
 
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+
 
 
 
