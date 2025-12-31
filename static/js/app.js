@@ -404,7 +404,12 @@ async function runOCR() {
         formData.append('saturation', elements.saturation.value / 100);
         formData.append('sharpness', elements.sharpness.value / 100);
 
-        const result = await fetch('/api/ocr', {
+        // Check if character coordinates are requested
+        const charCoordsCheckbox = document.getElementById('char-coords-checkbox');
+        const useCharCoords = charCoordsCheckbox && charCoordsCheckbox.checked;
+        const ocrEndpoint = useCharCoords ? '/api/ocr/chars' : '/api/ocr';
+
+        const result = await fetch(ocrEndpoint, {
             method: 'POST',
             body: formData
         });
@@ -1536,3 +1541,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.translateFeature = new TranslateFeature();
     window.batchFeature = new BatchFeature();
 });
+
+
