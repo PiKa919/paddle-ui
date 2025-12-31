@@ -1,4 +1,4 @@
-"""
+﻿"""
 PaddleOCR UI - Flask Backend
 Main application with API endpoints for OCR, model management, and image processing
 """
@@ -212,6 +212,84 @@ def get_versions():
     """Get list of available OCR versions"""
     engine = get_ocr_engine()
     return jsonify(engine.get_available_versions())
+
+
+
+@app.route('/api/language-groups', methods=['GET'])
+def get_language_groups():
+    """Get languages organized by script/region groups for better UI display"""
+    engine = get_ocr_engine()
+    groups = engine.get_language_groups()
+    languages = engine.get_available_languages()
+    
+    # Build organized structure with language names
+    organized = {}
+    for group_name, lang_codes in groups.items():
+        organized[group_name] = [
+            {'code': code, 'name': languages.get(code, code)}
+            for code in lang_codes if code in languages
+        ]
+    
+    return jsonify({
+        'groups': organized,
+        'all_languages': languages,
+        'total_count': len(languages)
+    })
+
+
+
+@app.route('/api/language-groups', methods=['GET'])
+def get_language_groups():
+    """Get languages organized by script/region groups for better UI display"""
+    engine = get_ocr_engine()
+    groups = engine.get_language_groups()
+    languages = engine.get_available_languages()
+    
+    # Build organized structure with language names
+    organized = {}
+    for group_name, lang_codes in groups.items():
+        organized[group_name] = [
+            {'code': code, 'name': languages.get(code, code)}
+            for code in lang_codes if code in languages
+        ]
+    
+    return jsonify({
+        'groups': organized,
+        'all_languages': languages,
+        'total_count': len(languages)
+    })
+
+@app.route('/api/language-groups', methods=['GET'])
+def get_language_groups():
+    """Get languages organized by script/region groups for better UI display"""
+    engine = get_ocr_engine()
+    groups = engine.get_language_groups()
+    languages = engine.get_available_languages()
+    
+    # Build organized structure with language names
+    organized = {}
+    for group_name, lang_codes in groups.items():
+        organized[group_name] = [
+            {'code': code, 'name': languages.get(code, code)}
+            for code in lang_codes if code in languages
+        ]
+    
+    return jsonify({
+        'groups': organized,
+        'all_languages': languages,
+        'total_count': len(languages)
+    })
+
+
+@app.route('/api/language-groups', methods=['GET'])
+def get_language_groups():
+    engine = get_ocr_engine()
+    groups = engine.get_language_groups()
+    languages = engine.get_available_languages()
+    organized = {}
+    for group_name, lang_codes in groups.items():
+        organized[group_name] = [{'code': code, 'name': languages.get(code, code)} for code in lang_codes if code in languages]
+    return jsonify({'groups': organized, 'all_languages': languages, 'total_count': len(languages)})
 
 
 def get_structure_engine(lang='ch'):
@@ -437,3 +515,6 @@ if __name__ == '__main__':
     print("=" * 50)
 
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+
+

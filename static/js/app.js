@@ -1,3 +1,89 @@
+﻿// ==================== Load Languages ====================
+async function loadLanguages() {
+    try {
+        const response = await fetch('/api/language-groups');
+        const data = await response.json();
+        const langSelect = elements.langSelect;
+        if (langSelect) {
+            langSelect.innerHTML = '';
+            for (const [groupName, languages] of Object.entries(data.groups)) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = groupName;
+                for (const lang of languages) {
+                    const option = document.createElement('option');
+                    option.value = lang.code;
+                    option.textContent = lang.name;
+                    if (lang.code === 'en') option.selected = true;
+                    optgroup.appendChild(option);
+                }
+                langSelect.appendChild(optgroup);
+            }
+            console.log('Loaded ' + data.total_count + ' languages');
+        }
+    } catch (error) {
+        console.error('Failed to load languages:', error);
+    }
+}
+
+// ==================== Load Languages ====================
+async function loadLanguages() {
+    try {
+        const response = await fetch('/api/language-groups');
+        const data = await response.json();
+        const langSelect = elements.langSelect;
+        if (langSelect) {
+            langSelect.innerHTML = '';
+            for (const [groupName, languages] of Object.entries(data.groups)) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = groupName;
+                for (const lang of languages) {
+                    const option = document.createElement('option');
+                    option.value = lang.code;
+                    option.textContent = lang.name;
+                    if (lang.code === 'en') option.selected = true;
+                    optgroup.appendChild(option);
+                }
+                langSelect.appendChild(optgroup);
+            }
+            console.log('Loaded ' + data.total_count + ' languages');
+        }
+    } catch (error) {
+        console.error('Failed to load languages:', error);
+    }
+}
+
+// ==================== Load Languages ====================
+async function loadLanguages() {
+    try {
+        const response = await fetch('/api/language-groups');
+        const data = await response.json();
+        
+        // Populate the language select with optgroups
+        const langSelect = elements.langSelect;
+        if (langSelect) {
+            langSelect.innerHTML = '';
+            
+            for (const [groupName, languages] of Object.entries(data.groups)) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = groupName;
+                
+                for (const lang of languages) {
+                    const option = document.createElement('option');
+                    option.value = lang.code;
+                    option.textContent = lang.name;
+                    if (lang.code === 'en') option.selected = true;
+                    optgroup.appendChild(option);
+                }
+                
+                langSelect.appendChild(optgroup);
+            }
+            
+            console.log('Loaded ' + data.total_count + ' languages');
+        }
+    } catch (error) {
+        console.error('Failed to load languages:', error);
+    }
+}
 /**
  * PaddleOCR Studio - Frontend Application
  * Handles image upload, OCR processing, and model management
@@ -166,7 +252,7 @@ function loadImage(dataUrl, filename = 'image') {
         drawImageToCanvas(img);
 
         // Update info
-        elements.imageInfo.textContent = `${filename} • ${img.width} × ${img.height}`;
+        elements.imageInfo.textContent = `${filename} â€¢ ${img.width} Ã— ${img.height}`;
 
         // Enable buttons
         elements.clearBtn.disabled = false;
@@ -489,7 +575,7 @@ function renderModels(models) {
             <div class="model-card-actions">
                 ${model.installed ? `
                     <button class="btn btn-success btn-sm" disabled>
-                        ✓ Installed
+                        âœ“ Installed
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="deleteModel('${model.id}')">
                         Delete
@@ -579,6 +665,8 @@ function showToast(message, type = 'info') {
 
 // ==================== Initialize ====================
 document.addEventListener('DOMContentLoaded', () => {
+    loadLanguages();
+    loadLanguages();
     initTabs();
     initUpload();
     initAdjustments();
@@ -705,7 +793,7 @@ function loadStructureImage(dataUrl, filename = 'document') {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         }
 
-        if (info) info.textContent = `${filename} • ${img.width} × ${img.height}`;
+        if (info) info.textContent = `${filename} â€¢ ${img.width} Ã— ${img.height}`;
         if (clearBtn) clearBtn.disabled = false;
         if (structureBtn) structureBtn.disabled = false;
     };
@@ -950,7 +1038,7 @@ function loadVLImage(dataUrl, filename = 'image') {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         }
 
-        if (info) info.textContent = `${filename} • ${img.width} × ${img.height}`;
+        if (info) info.textContent = `${filename} â€¢ ${img.width} Ã— ${img.height}`;
         if (clearBtn) clearBtn.disabled = false;
         if (vlBtn) vlBtn.disabled = false;
     };
@@ -1056,3 +1144,6 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+
+

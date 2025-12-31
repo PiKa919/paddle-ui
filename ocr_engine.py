@@ -1,6 +1,7 @@
-"""
+﻿"""
 PaddleOCR Engine Wrapper
 Handles OCR operations with CPU-only mode support
+Updated for PaddleOCR 3.x with 109+ languages support
 """
 import os
 from paddleocr import PaddleOCR
@@ -10,28 +11,141 @@ import numpy as np
 class OCREngine:
     """Wrapper around PaddleOCR for CPU-only inference"""
 
-    # Supported languages and their codes (PaddleOCR 3.x compatible)
+    # Complete language list from PaddleOCR 3.x (109 languages)
+    # Grouped by script/region for better organization
     LANGUAGES = {
+        # East Asian
         'ch': 'Chinese (Simplified)',
-        'en': 'English',
         'chinese_cht': 'Chinese (Traditional)',
-        'korean': 'Korean',
         'japan': 'Japanese',
-        'ar': 'Arabic',  # Changed from 'arabic' to 'ar'
-        'latin': 'Latin',
-        'cyrillic': 'Cyrillic',
-        'devanagari': 'Devanagari',
-        'ta': 'Tamil',
-        'te': 'Telugu',
-        'ka': 'Kannada',
+        'korean': 'Korean',
+        
+        # Latin Script - Major European Languages
+        'en': 'English',
         'german': 'German',
         'french': 'French',
         'spanish': 'Spanish',
         'italian': 'Italian',
         'portuguese': 'Portuguese',
-        'ru': 'Russian',  # Changed from 'russian' to 'ru'
+        'dutch': 'Dutch',
+        'polish': 'Polish',
+        'romanian': 'Romanian',
+        'swedish': 'Swedish',
+        'norwegian': 'Norwegian',
+        'danish': 'Danish',
+        'finnish': 'Finnish',
+        'czech': 'Czech',
+        'hungarian': 'Hungarian',
+        'croatian': 'Croatian',
+        'slovenian': 'Slovenian',
+        'slovak': 'Slovak',
+        'serbian_latin': 'Serbian (Latin)',
+        'bosnian': 'Bosnian',
+        'albanian': 'Albanian',
+        'estonian': 'Estonian',
+        'latvian': 'Latvian',
+        'lithuanian': 'Lithuanian',
+        'irish': 'Irish',
+        'welsh': 'Welsh',
+        'icelandic': 'Icelandic',
+        'maltese': 'Maltese',
+        'luxembourgish': 'Luxembourgish',
+        'catalan': 'Catalan',
+        'galician': 'Galician',
+        'basque': 'Basque',
+        
+        # Latin Script - Other
+        'latin': 'Latin (General)',
+        'vietnamese': 'Vietnamese',
+        'indonesian': 'Indonesian',
+        'malay': 'Malay',
+        'filipino': 'Filipino/Tagalog',
+        'turkish': 'Turkish',
+        'azerbaijani': 'Azerbaijani',
+        'uzbek': 'Uzbek',
+        'turkmen': 'Turkmen',
+        'swahili': 'Swahili',
+        'afrikaans': 'Afrikaans',
+        'hausa': 'Hausa',
+        'yoruba': 'Yoruba',
+        'igbo': 'Igbo',
+        'zulu': 'Zulu',
+        'xhosa': 'Xhosa',
+        'somali': 'Somali',
+        
+        # Cyrillic Script
+        'cyrillic': 'Cyrillic (General)',
+        'ru': 'Russian',
+        'ukrainian': 'Ukrainian',
+        'belarusian': 'Belarusian',
+        'bulgarian': 'Bulgarian',
+        'serbian_cyrillic': 'Serbian (Cyrillic)',
+        'macedonian': 'Macedonian',
+        'mongolian': 'Mongolian',
+        'kazakh': 'Kazakh',
+        'kyrgyz': 'Kyrgyz',
+        'tajik': 'Tajik',
+        
+        # Arabic Script
+        'ar': 'Arabic',
+        'fa': 'Persian/Farsi',
+        'ur': 'Urdu',
+        'ps': 'Pashto',
+        'ug': 'Uyghur',
+        'ku': 'Kurdish',
+        'sd': 'Sindhi',
+        
+        # Devanagari & Indic Scripts
+        'devanagari': 'Devanagari (General)',
         'hi': 'Hindi',
         'mr': 'Marathi',
+        'ne': 'Nepali',
+        'sa': 'Sanskrit',
+        'bn': 'Bengali',
+        'as': 'Assamese',
+        'gu': 'Gujarati',
+        'pa': 'Punjabi (Gurmukhi)',
+        'or': 'Odia/Oriya',
+        'ta': 'Tamil',
+        'te': 'Telugu',
+        'kn': 'Kannada',
+        'ml': 'Malayalam',
+        'si': 'Sinhala',
+        
+        # Southeast Asian Scripts
+        'th': 'Thai',
+        'lo': 'Lao',
+        'my': 'Myanmar/Burmese',
+        'km': 'Khmer',
+        
+        # Other Scripts
+        'greek': 'Greek',
+        'he': 'Hebrew',
+        'am': 'Amharic',
+        'ti': 'Tigrinya',
+        'ka': 'Georgian',
+        'hy': 'Armenian',
+    }
+    
+    # Language groups for UI organization
+    LANGUAGE_GROUPS = {
+        'East Asian': ['ch', 'chinese_cht', 'japan', 'korean'],
+        'Latin - European': ['en', 'german', 'french', 'spanish', 'italian', 'portuguese', 
+                            'dutch', 'polish', 'romanian', 'swedish', 'norwegian', 'danish',
+                            'finnish', 'czech', 'hungarian', 'croatian', 'slovenian', 'slovak',
+                            'serbian_latin', 'bosnian', 'albanian', 'estonian', 'latvian',
+                            'lithuanian', 'irish', 'welsh', 'icelandic', 'maltese',
+                            'luxembourgish', 'catalan', 'galician', 'basque'],
+        'Latin - Other': ['latin', 'vietnamese', 'indonesian', 'malay', 'filipino', 'turkish',
+                         'azerbaijani', 'uzbek', 'turkmen', 'swahili', 'afrikaans', 'hausa',
+                         'yoruba', 'igbo', 'zulu', 'xhosa', 'somali'],
+        'Cyrillic': ['cyrillic', 'ru', 'ukrainian', 'belarusian', 'bulgarian', 'serbian_cyrillic',
+                    'macedonian', 'mongolian', 'kazakh', 'kyrgyz', 'tajik'],
+        'Arabic Script': ['ar', 'fa', 'ur', 'ps', 'ug', 'ku', 'sd'],
+        'Indic Scripts': ['devanagari', 'hi', 'mr', 'ne', 'sa', 'bn', 'as', 'gu', 'pa', 'or',
+                         'ta', 'te', 'kn', 'ml', 'si'],
+        'Southeast Asian': ['th', 'lo', 'my', 'km'],
+        'Other Scripts': ['greek', 'he', 'am', 'ti', 'ka', 'hy'],
     }
 
     # OCR versions available
@@ -44,7 +158,7 @@ class OCREngine:
         Args:
             lang: Language code (default: 'en')
             ocr_version: OCR model version (default: 'PP-OCRv5')
-        
+
         Raises:
             ValueError: If lang or ocr_version is not supported
         """
@@ -55,7 +169,7 @@ class OCREngine:
         # Validate OCR version
         if ocr_version not in self.OCR_VERSIONS:
             raise ValueError(f"Unsupported OCR version: '{ocr_version}'. Supported versions: {self.OCR_VERSIONS}")
-        
+
         self.lang = lang
         self.ocr_version = ocr_version
         self._ocr = None
@@ -78,11 +192,11 @@ class OCREngine:
     def switch_model(self, lang=None, ocr_version=None):
         """
         Switch to a different model configuration
-        
+
         Args:
             lang: New language code (optional)
             ocr_version: New OCR version (optional)
-        
+
         Raises:
             ValueError: If lang or ocr_version is not supported
         """
@@ -90,12 +204,12 @@ class OCREngine:
             if lang not in self.LANGUAGES:
                 raise ValueError(f"Unsupported language: '{lang}'. Supported languages: {list(self.LANGUAGES.keys())}")
             self.lang = lang
-        
+
         if ocr_version is not None:
             if ocr_version not in self.OCR_VERSIONS:
                 raise ValueError(f"Unsupported OCR version: '{ocr_version}'. Supported versions: {self.OCR_VERSIONS}")
             self.ocr_version = ocr_version
-        
+
         self._initialize()
 
     def detect_text(self, image):
@@ -164,8 +278,12 @@ class OCREngine:
         }
 
     def get_available_languages(self):
-        """Return list of available languages"""
+        """Return dict of available languages"""
         return self.LANGUAGES
+
+    def get_language_groups(self):
+        """Return languages organized by script/region groups"""
+        return self.LANGUAGE_GROUPS
 
     def get_available_versions(self):
         """Return list of available OCR versions"""
