@@ -84,7 +84,7 @@ class ModelManager:
             'type': 'recognition',
             'version': 'v3',
             'language': 'korean',
-            'url': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/japan_PP-OCRv3_mobile_rec_infer.tar',
+            'url': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/korean_PP-OCRv3_mobile_rec_infer.tar',
             'size_mb': 12,
         },
         'PP-OCRv3_rec_japan': {
