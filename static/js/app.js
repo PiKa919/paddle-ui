@@ -1147,3 +1147,392 @@ function escapeHtml(text) {
 
 
 
+
+
+// ==================== ChatOCR Feature ====================
+
+class ChatOCRFeature {
+    constructor() {
+        this.file = null;
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        const uploadZone = document.getElementById('chatocr-upload-zone');
+        const fileInput = document.getElementById('chatocr-file-input');
+        const extractBtn = document.getElementById('chatocr-extract-btn');
+        const templateSelect = document.getElementById('chatocr-template');
+
+        if (uploadZone) {
+            uploadZone.addEventListener('click', () => fileInput.click());
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    this.handleFile(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    this.handleFile(e.target.files[0]);
+                }
+            });
+        }
+
+        if (extractBtn) {
+            extractBtn.addEventListener('click', () => this.extractInfo());
+        }
+
+        if (templateSelect) {
+            templateSelect.addEventListener('change', () => this.applyTemplate());
+        }
+    }
+
+    handleFile(file) {
+        this.file = file;
+        const preview = document.getElementById('chatocr-preview');
+        const previewImage = document.getElementById('chatocr-preview-image');
+        const extractBtn = document.getElementById('chatocr-extract-btn');
+
+        if (preview) preview.style.display = 'block';
+        if (previewImage) previewImage.src = URL.createObjectURL(file);
+        if (extractBtn) extractBtn.disabled = false;
+    }
+
+    applyTemplate() {
+        const template = document.getElementById('chatocr-template').value;
+        const keysInput = document.getElementById('chatocr-keys');
+
+        const templates = {
+            'invoice': 'invoice_number, date, vendor, total, tax, items',
+            'receipt': 'store_name, date, items, subtotal, tax, total',
+            'id_card': 'name, id_number, date_of_birth, address, expiry_date',
+            'business_card': 'name, company, title, phone, email, address',
+            'custom': ''
+        };
+
+        if (keysInput && templates[template] !== undefined) {
+            keysInput.value = templates[template];
+        }
+    }
+
+    async extractInfo() {
+        if (!this.file) return;
+
+        const apiKey = document.getElementById('chatocr-api-key').value;
+        const provider = document.getElementById('chatocr-provider').value;
+        const keys = document.getElementById('chatocr-keys').value.split(',').map(k => k.trim()).filter(k => k);
+
+        if (keys.length === 0) {
+            alert('Please enter keys to extract');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', this.file);
+        formData.append('api_key', apiKey);
+        formData.append('provider', provider);
+        formData.append('keys', JSON.stringify(keys));
+
+        const resultsDiv = document.getElementById('chatocr-results');
+        resultsDiv.innerHTML = '<p class="loading">Extracting information...</p>';
+
+        try {
+            const response = await fetch('/api/chatocr/extract', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                resultsDiv.innerHTML = '<p class="error">Error: ' + escapeHtml(data.error) + '</p>';
+            } else {
+                let html = '<div class="extraction-results">';
+                html += '<h4>Extracted Information</h4>';
+                html += '<table class="results-table">';
+                for (const [key, value] of Object.entries(data.extracted || {})) {
+                    html += '<tr><td><strong>' + escapeHtml(key) + '</strong></td><td>' + escapeHtml(String(value)) + '</td></tr>';
+                }
+                html += '</table>';
+                if (data.ocr_text) {
+                    html += '<h4>OCR Text</h4><pre>' + escapeHtml(data.ocr_text) + '</pre>';
+                }
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+            }
+        } catch (error) {
+            resultsDiv.innerHTML = '<p class="error">Error: ' + escapeHtml(error.message) + '</p>';
+        }
+    }
+}
+
+// ==================== Translation Feature ====================
+
+class TranslateFeature {
+    constructor() {
+        this.file = null;
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        const uploadZone = document.getElementById('translate-upload-zone');
+        const fileInput = document.getElementById('translate-file-input');
+        const translateBtn = document.getElementById('translate-btn');
+
+        if (uploadZone) {
+            uploadZone.addEventListener('click', () => fileInput.click());
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    this.handleFile(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    this.handleFile(e.target.files[0]);
+                }
+            });
+        }
+
+        if (translateBtn) {
+            translateBtn.addEventListener('click', () => this.translateDocument());
+        }
+    }
+
+    handleFile(file) {
+        this.file = file;
+        const preview = document.getElementById('translate-preview');
+        const previewImage = document.getElementById('translate-preview-image');
+        const translateBtn = document.getElementById('translate-btn');
+
+        if (file.type.startsWith('image/')) {
+            if (preview) preview.style.display = 'block';
+            if (previewImage) previewImage.src = URL.createObjectURL(file);
+        } else {
+            if (preview) preview.style.display = 'none';
+        }
+        if (translateBtn) translateBtn.disabled = false;
+    }
+
+    async translateDocument() {
+        if (!this.file) return;
+
+        const apiKey = document.getElementById('translate-api-key').value;
+        const sourceLang = document.getElementById('translate-source').value;
+        const targetLang = document.getElementById('translate-target').value;
+
+        const formData = new FormData();
+        formData.append('file', this.file);
+        formData.append('api_key', apiKey);
+        formData.append('source_lang', sourceLang);
+        formData.append('target_lang', targetLang);
+
+        const resultsDiv = document.getElementById('translate-results');
+        resultsDiv.innerHTML = '<p class="loading">Translating document...</p>';
+
+        try {
+            const response = await fetch('/api/translate/document', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                resultsDiv.innerHTML = '<p class="error">Error: ' + escapeHtml(data.error) + '</p>';
+            } else {
+                let html = '<div class="translation-results">';
+                html += '<h4>Original Text</h4><pre>' + escapeHtml(data.original_text || '') + '</pre>';
+                html += '<h4>Translation</h4><pre>' + escapeHtml(data.translated_text || '') + '</pre>';
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+            }
+        } catch (error) {
+            resultsDiv.innerHTML = '<p class="error">Error: ' + escapeHtml(error.message) + '</p>';
+        }
+    }
+}
+
+// ==================== Batch Processing Feature ====================
+
+class BatchFeature {
+    constructor() {
+        this.files = [];
+        this.jobId = null;
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        const uploadZone = document.getElementById('batch-upload-zone');
+        const fileInput = document.getElementById('batch-file-input');
+        const processBtn = document.getElementById('batch-process-btn');
+        const exportBtn = document.getElementById('batch-export-btn');
+
+        if (uploadZone) {
+            uploadZone.addEventListener('click', () => fileInput.click());
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                this.handleFiles(e.dataTransfer.files);
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                this.handleFiles(e.target.files);
+            });
+        }
+
+        if (processBtn) {
+            processBtn.addEventListener('click', () => this.processFiles());
+        }
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportResults());
+        }
+    }
+
+    handleFiles(fileList) {
+        this.files = Array.from(fileList);
+        const fileListDiv = document.getElementById('batch-file-list');
+        const processBtn = document.getElementById('batch-process-btn');
+
+        if (fileListDiv) {
+            let html = '<div class="file-items">';
+            this.files.forEach((file, i) => {
+                html += '<div class="file-item"><span>' + escapeHtml(file.name) + '</span><span class="file-size">' + (file.size / 1024).toFixed(1) + ' KB</span></div>';
+            });
+            html += '</div>';
+            fileListDiv.innerHTML = html;
+        }
+
+        if (processBtn) processBtn.disabled = this.files.length === 0;
+    }
+
+    async processFiles() {
+        if (this.files.length === 0) return;
+
+        const jobType = document.getElementById('batch-type').value;
+        const lang = document.getElementById('batch-lang').value;
+
+        const formData = new FormData();
+        this.files.forEach(file => formData.append('files', file));
+        formData.append('job_type', jobType);
+        formData.append('options', JSON.stringify({ lang }));
+
+        const progressText = document.getElementById('batch-progress-text');
+        const progressFill = document.getElementById('batch-progress-fill');
+        const resultsDiv = document.getElementById('batch-results');
+        const exportBtn = document.getElementById('batch-export-btn');
+
+        progressText.textContent = 'Creating batch job...';
+        progressFill.style.width = '10%';
+        resultsDiv.innerHTML = '';
+
+        try {
+            // Create job
+            let response = await fetch('/api/batch/create', {
+                method: 'POST',
+                body: formData
+            });
+            let data = await response.json();
+
+            if (data.error) {
+                progressText.textContent = 'Error: ' + data.error;
+                return;
+            }
+
+            this.jobId = data.job_id;
+            progressText.textContent = 'Processing ' + data.file_count + ' files...';
+            progressFill.style.width = '30%';
+
+            // Process job
+            response = await fetch('/api/batch/' + this.jobId + '/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lang })
+            });
+            data = await response.json();
+
+            progressFill.style.width = '100%';
+
+            if (data.error) {
+                progressText.textContent = 'Error: ' + data.error;
+            } else {
+                progressText.textContent = data.completed + ' / ' + data.total + ' files processed';
+                if (exportBtn) exportBtn.disabled = false;
+
+                let html = '<div class="batch-results-list">';
+                (data.results || []).forEach((result, i) => {
+                    html += '<div class="batch-result-item">';
+                    html += '<h5>' + escapeHtml(result.filename || 'File ' + (i+1)) + '</h5>';
+                    if (result.error) {
+                        html += '<p class="error">' + escapeHtml(result.error) + '</p>';
+                    } else if (result.text) {
+                        html += '<pre>' + escapeHtml(result.text.substring(0, 500)) + (result.text.length > 500 ? '...' : '') + '</pre>';
+                    } else {
+                        html += '<pre>' + escapeHtml(JSON.stringify(result, null, 2).substring(0, 500)) + '</pre>';
+                    }
+                    html += '</div>';
+                });
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+            }
+        } catch (error) {
+            progressText.textContent = 'Error: ' + error.message;
+        }
+    }
+
+    async exportResults() {
+        if (!this.jobId) return;
+
+        try {
+            const response = await fetch('/api/batch/' + this.jobId + '/export', {
+                method: 'POST'
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                alert('Export error: ' + data.error);
+            } else {
+                // Download as JSON
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'batch_results.json';
+                a.click();
+            }
+        } catch (error) {
+            alert('Export error: ' + error.message);
+        }
+    }
+}
+
+// Initialize new features when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.chatOCRFeature = new ChatOCRFeature();
+    window.translateFeature = new TranslateFeature();
+    window.batchFeature = new BatchFeature();
+});

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -60,6 +60,35 @@
                         <line x1="12" y1="22.08" x2="12" y2="12" />
                     </svg>
                     Models
+                </button>
+            
+                <button class="tab-btn" data-tab="chatocr">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        <line x1="9" y1="10" x2="15" y2="10"/>
+                        <line x1="12" y1="7" x2="12" y2="13"/>
+                    </svg>
+                    Chat OCR
+                </button>
+                <button class="tab-btn" data-tab="translate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 8l6 6"/>
+                        <path d="M4 14l6-6 2-3"/>
+                        <path d="M2 5h12"/>
+                        <path d="M7 2v3"/>
+                        <path d="M22 22l-5-10-5 10"/>
+                        <path d="M14 18h6"/>
+                    </svg>
+                    Translate
+                </button>
+                <button class="tab-btn" data-tab="batch">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        <rect x="9" y="9" width="6" height="6"/>
+                        <line x1="9" y1="2" x2="9" y2="4"/>
+                        <line x1="15" y1="2" x2="15" y2="4"/>
+                    </svg>
+                    Batch
                 </button>
             </nav>
             <div class="header-actions">
@@ -423,7 +452,7 @@
                                         d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                                 </svg>
                                 <p class="drop-text">Drop image here or <span class="browse-link">browse</span></p>
-                                <p class="drop-hint">Vision-Language model • 109 languages</p>
+                                <p class="drop-hint">Vision-Language model â€¢ 109 languages</p>
                             </div>
                             <input type="file" id="vl-file-input" accept="image/*" hidden>
                         </div>
@@ -541,6 +570,231 @@
                     </div>
                 </div>
             </section>
+        
+            <!-- ChatOCR Tab -->
+            <section class="tab-content" id="chatocr-tab">
+                <div class="ocr-layout">
+                    <div class="panel upload-panel">
+                        <div class="panel-header">
+                            <h3>Document Upload</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="upload-zone" id="chatocr-upload-zone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <p>Drop document image here</p>
+                                <span>or click to browse</span>
+                                <input type="file" id="chatocr-file-input" accept="image/*" hidden>
+                            </div>
+                            <div class="image-preview" id="chatocr-preview">
+                                <img id="chatocr-preview-image" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel results-panel">
+                        <div class="panel-header">
+                            <h3>Key Information Extraction</h3>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" id="chatocr-extract-btn" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                    Extract Info
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="settings-grid">
+                                <div class="setting-group">
+                                    <label for="chatocr-provider">LLM Provider</label>
+                                    <select id="chatocr-provider">
+                                        <option value="ernie">ERNIE (Baidu)</option>
+                                        <option value="openai">OpenAI</option>
+                                        <option value="ollama">Ollama (Local)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label for="chatocr-api-key">API Key</label>
+                                    <input type="password" id="chatocr-api-key" placeholder="Enter API Key">
+                                </div>
+                                <div class="setting-group">
+                                    <label for="chatocr-template">Template</label>
+                                    <select id="chatocr-template">
+                                        <option value="custom">Custom Keys</option>
+                                        <option value="invoice">Invoice</option>
+                                        <option value="receipt">Receipt</option>
+                                        <option value="id_card">ID Card</option>
+                                        <option value="business_card">Business Card</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group full-width">
+                                    <label for="chatocr-keys">Keys to Extract (comma-separated)</label>
+                                    <input type="text" id="chatocr-keys" placeholder="e.g., name, date, total, address">
+                                </div>
+                            </div>
+                            <div class="results-container">
+                                <div id="chatocr-results" class="results-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Translate Tab -->
+            <section class="tab-content" id="translate-tab">
+                <div class="ocr-layout">
+                    <div class="panel upload-panel">
+                        <div class="panel-header">
+                            <h3>Document Upload</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="upload-zone" id="translate-upload-zone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <p>Drop document here</p>
+                                <span>Supports images, PDFs, Markdown</span>
+                                <input type="file" id="translate-file-input" accept="image/*,.pdf,.md" hidden>
+                            </div>
+                            <div class="image-preview" id="translate-preview">
+                                <img id="translate-preview-image" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel results-panel">
+                        <div class="panel-header">
+                            <h3>Document Translation</h3>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" id="translate-btn" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 8l6 6"/>
+                                        <path d="M22 22l-5-10-5 10"/>
+                                    </svg>
+                                    Translate
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="settings-grid">
+                                <div class="setting-group">
+                                    <label for="translate-source">Source Language</label>
+                                    <select id="translate-source">
+                                        <option value="en">English</option>
+                                        <option value="zh">Chinese</option>
+                                        <option value="ja">Japanese</option>
+                                        <option value="ko">Korean</option>
+                                        <option value="de">German</option>
+                                        <option value="fr">French</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="ru">Russian</option>
+                                        <option value="ar">Arabic</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label for="translate-target">Target Language</label>
+                                    <select id="translate-target">
+                                        <option value="zh">Chinese</option>
+                                        <option value="en">English</option>
+                                        <option value="ja">Japanese</option>
+                                        <option value="ko">Korean</option>
+                                        <option value="de">German</option>
+                                        <option value="fr">French</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="ru">Russian</option>
+                                        <option value="ar">Arabic</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label for="translate-api-key">ERNIE API Key</label>
+                                    <input type="password" id="translate-api-key" placeholder="Enter API Key">
+                                </div>
+                            </div>
+                            <div class="results-container">
+                                <div id="translate-results" class="results-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Batch Tab -->
+            <section class="tab-content" id="batch-tab">
+                <div class="ocr-layout">
+                    <div class="panel upload-panel">
+                        <div class="panel-header">
+                            <h3>Batch File Upload</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="upload-zone" id="batch-upload-zone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                    <rect x="9" y="9" width="6" height="6"/>
+                                </svg>
+                                <p>Drop multiple files here</p>
+                                <span>Process many files at once</span>
+                                <input type="file" id="batch-file-input" accept="image/*,.pdf" multiple hidden>
+                            </div>
+                            <div class="batch-file-list" id="batch-file-list"></div>
+                        </div>
+                    </div>
+                    <div class="panel results-panel">
+                        <div class="panel-header">
+                            <h3>Batch Processing</h3>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" id="batch-process-btn" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                    Process All
+                                </button>
+                                <button class="btn btn-secondary" id="batch-export-btn" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="settings-grid">
+                                <div class="setting-group">
+                                    <label for="batch-type">Processing Type</label>
+                                    <select id="batch-type">
+                                        <option value="ocr">OCR (Text Extraction)</option>
+                                        <option value="structure">Structure Analysis</option>
+                                        <option value="vl">Visual Language</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label for="batch-lang">Language</label>
+                                    <select id="batch-lang">
+                                        <option value="en">English</option>
+                                        <option value="ch">Chinese</option>
+                                        <option value="multi">Multi-language</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="batch-progress" id="batch-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="batch-progress-fill"></div>
+                                </div>
+                                <div class="progress-text" id="batch-progress-text">0 / 0 files processed</div>
+                            </div>
+                            <div class="results-container">
+                                <div id="batch-results" class="results-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <!-- Toast Notifications -->

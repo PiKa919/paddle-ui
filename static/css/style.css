@@ -1021,3 +1021,140 @@ body {
     font-size: 13px;
     word-break: break-all;
 }
+
+/* ==================== New Feature Styles ==================== */
+
+/* Results table for ChatOCR */
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.results-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.results-table td:first-child {
+    width: 30%;
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+/* Batch file list */
+.batch-file-list {
+    margin-top: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.file-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.file-size {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Batch progress */
+.batch-progress {
+    margin: 1.5rem 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    margin-top: 0.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Batch results */
+.batch-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.batch-result-item {
+    padding: 1rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.batch-result-item h5 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.batch-result-item pre {
+    margin: 0;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Translation results */
+.translation-results h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.translation-results pre {
+    padding: 1rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Extraction results */
+.extraction-results h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+/* Loading and error states */
+.loading {
+    color: var(--primary-color);
+    font-style: italic;
+}
+
+.error {
+    color: #e74c3c;
+}
+
+/* Full width setting group */
+.setting-group.full-width {
+    grid-column: 1 / -1;
+}

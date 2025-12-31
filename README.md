@@ -156,6 +156,71 @@ Greek, Hebrew, Amharic, Tigrinya, Georgian, Armenian
 ### Model Management
 ![Models Tab](screenshots/models_tab.png)
 
+
+
+###  Chat OCR Mode (PP-ChatOCRv4)
+- **LLM-based key information extraction** from documents
+- Multiple LLM providers: ERNIE (Baidu), OpenAI, Ollama (local)
+- Built-in extraction templates (invoice, receipt, ID card, business card)
+- Custom key extraction
+- Ask natural language questions about document content
+
+###  Translation Mode (PP-DocTranslation)
+- **Document translation** powered by ERNIE 4.5
+- 14 supported languages (English, Chinese, Japanese, Korean, German, French, Spanish, Russian, Arabic, Italian, Portuguese, Vietnamese, Thai, Indonesian)
+- Translate images, PDFs, and Markdown documents
+- Preserves document structure during translation
+
+###  Batch Processing
+- Process **multiple files at once**
+- Supports OCR, Structure, and VL batch operations
+- Progress tracking with real-time updates
+- Export all results to JSON
+- Job management with status tracking
+
+###  Single-Character Coordinates
+- Get **character-level bounding boxes** for precise text positioning
+- Useful for text overlay, editing, and localization tasks
+- Available via /api/ocr/chars endpoint
+
+
+
+##  API Reference
+
+### Core Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /api/ocr | POST | Perform OCR on image |
+| /api/ocr/chars | POST | OCR with character-level coordinates |
+| /api/structure | POST | Document structure analysis |
+| /api/vl | POST | Vision-Language model processing |
+
+### ChatOCR Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /api/chatocr/extract | POST | Extract key info from document |
+| /api/chatocr/templates | GET | Get extraction templates |
+| /api/chatocr/providers | GET | Get supported LLM providers |
+| /api/chatocr/ask | POST | Ask question about document |
+
+### Translation Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /api/translate/document | POST | Translate document |
+| /api/translate/text | POST | Translate plain text |
+| /api/translate/languages | GET | Get supported languages |
+
+### Batch Processing Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /api/batch/create | POST | Create batch job |
+| /api/batch/<job_id>/process | POST | Start processing |
+| /api/batch/<job_id> | GET | Get job status |
+| /api/batch/<job_id> | DELETE | Delete job |
+| /api/batch/<job_id>/export | POST | Export results |
+| /api/batch | GET | List all jobs |
+
+
 ##  License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.

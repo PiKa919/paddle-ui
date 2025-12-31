@@ -277,6 +277,84 @@ class OCREngine:
             'full_text': ' '.join([t['text'] for t in texts])
         }
 
+
+    def detect_text_with_chars(self, image):
+        """
+        Detect and recognize text with single-character coordinates.
+        Available in PaddleOCR 3.2+
+
+        Args:
+            image: Image path, URL, or numpy array
+
+        Returns:
+            dict with 'boxes', 'texts', and 'char_coordinates' for each text box
+        """
+        result = self._ocr.predict(image)
+
+        boxes = []
+        texts = []
+
+        for res in result:
+            def get_value(obj, key, default=None):
+                if isinstance(obj, dict) or hasattr(obj, 'keys'):
+                    return obj.get(key, default)
+                return getattr(obj, key, default)
+
+            rec_polys = get_value(res, 'rec_polys')
+            rec_texts = get_value(res, 'rec_texts')
+            rec_scores = get_value(res, 'rec_scores')
+            # Character-level coordinates (PaddleOCR 3.2+)
+            rec_char_polys = get_value(res, 'rec_char_polys')
+            rec_char_scores = get_value(res, 'rec_char_scores')
+
+            if rec_polys is not None and rec_texts is not None:
+                scores = rec_scores if rec_scores is not None else [1.0] * len(rec_texts)
+                char_polys_list = rec_char_polys if rec_char_polys is not None else [None] * len(rec_texts)
+                char_scores_list = rec_char_scores if rec_char_scores is not None else [None] * len(rec_texts)
+                
+                for i, (poly, text, score) in enumerate(zip(rec_polys, rec_texts, scores)):
+                    if poly is not None:
+                        poly_list = poly.tolist() if isinstance(poly, np.ndarray) else poly
+                        
+                        # Process character coordinates
+                        char_coords = []
+                        if i < len(char_polys_list) and char_polys_list[i] is not None:
+                            char_polys = char_polys_list[i]
+                            char_scores = char_scores_list[i] if i < len(char_scores_list) and char_scores_list[i] is not None else [1.0] * len(text)
+                            
+                            for j, char in enumerate(text):
+                                char_poly = char_polys[j] if j < len(char_polys) else None
+                                char_score = char_scores[j] if j < len(char_scores) else 1.0
+                                
+                                if char_poly is not None:
+                                    char_poly_list = char_poly.tolist() if isinstance(char_poly, np.ndarray) else char_poly
+                                    char_coords.append({
+                                        'char': char,
+                                        'index': j,
+                                        'points': char_poly_list,
+                                        'confidence': float(char_score) if char_score else 1.0,
+                                    })
+                        
+                        boxes.append({
+                            'points': poly_list,
+                            'text': text,
+                            'confidence': float(score) if score else 1.0,
+                            'char_coordinates': char_coords,
+                        })
+                        texts.append({
+                            'text': text,
+                            'confidence': float(score) if score else 1.0,
+                            'char_count': len(text),
+                            'has_char_coords': len(char_coords) > 0,
+                        })
+
+        return {
+            'boxes': boxes,
+            'texts': texts,
+            'full_text': ' '.join([t['text'] for t in texts]),
+            'char_level': True,
+        }
+
     def get_available_languages(self):
         """Return dict of available languages"""
         return self.LANGUAGES
@@ -288,3 +366,4 @@ class OCREngine:
     def get_available_versions(self):
         """Return list of available OCR versions"""
         return self.OCR_VERSIONS
+
