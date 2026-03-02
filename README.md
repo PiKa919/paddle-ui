@@ -1,4 +1,12 @@
-﻿# PaddleOCR Studio (paddle-ui)
+﻿---
+title: Paddle UI
+emoji: 🦀
+colorFrom: red
+colorTo: blue
+sdk: docker
+app_port: 7860
+---
+# PaddleOCR Studio (paddle-ui)
 
 A modern web-based OCR application powered by PaddleOCR 3.x with advanced document parsing capabilities.
 

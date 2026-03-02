@@ -50,6 +50,10 @@ COPY structure_engine.py .
 COPY vl_engine.py .
 COPY model_manager.py .
 COPY image_processor.py .
+COPY chat_ocr_engine.py .
+COPY translation_engine.py .
+COPY batch_processor.py .
+COPY arabic_ocr.py .
 COPY templates/ templates/
 COPY static/ static/
 
@@ -62,11 +66,11 @@ ENV DISABLE_MODEL_SOURCE_CHECK=True
 ENV FLASK_APP=app.py
 
 # Expose port
-EXPOSE 5000
+EXPOSE 7860
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:5000/ || exit 1
+    CMD curl -f http://localhost:7860/ || exit 1
 
 # Run with gunicorn for production
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120", "app:app"]

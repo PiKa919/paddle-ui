@@ -49,6 +49,22 @@ def get_ocr_engine(lang='en', version='PP-OCRv5'):
     return ocr_engine
 
 
+def get_structure_engine(lang='ch'):
+    """Get or create structure engine"""
+    global structure_engine
+    if structure_engine is None or getattr(structure_engine, 'lang', None) != lang:
+        structure_engine = StructureEngine(lang=lang)
+    return structure_engine
+
+
+def get_vl_engine():
+    """Get or create VL engine"""
+    global vl_engine
+    if vl_engine is None:
+        vl_engine = VLEngine()
+    return vl_engine
+
+
 def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -768,7 +784,8 @@ if __name__ == '__main__':
     print("Starting server at http://localhost:5000")
     print("=" * 50)
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 7860))
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 
 
