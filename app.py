@@ -781,10 +781,10 @@ if __name__ == '__main__':
     print("=" * 50)
     print(f"Upload folder: {app.config['UPLOAD_FOLDER']}")
     print(f"Model directory: {model_manager.model_dir}")
-    print("Starting server at http://localhost:5000")
+    port = int(os.environ.get('PORT', 7860))
+    print(f"Starting server at http://localhost:{port}")
     print("=" * 50)
 
-    port = int(os.environ.get('PORT', 7860))
     app.run(host='0.0.0.0', port=port, debug=True)
 
 

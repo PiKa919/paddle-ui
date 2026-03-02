@@ -1,4 +1,4 @@
-﻿---
+---
 title: Paddle UI
 emoji: 🦀
 colorFrom: red
@@ -74,7 +74,7 @@ pip install pymupdf
 python app.py
 `
 
-Open http://localhost:5000 in your browser.
+Open http://localhost:7860 in your browser.
 
 ###  Docker (Recommended)
 
@@ -88,10 +88,10 @@ docker-compose up -d
 
 # Or build manually
 docker build -t paddle-ui .
-docker run -p 5000:5000 -v paddleocr-models:/root/.paddleocr paddle-ui
+docker run -p 7860:7860 -v paddleocr-models:/root/.paddleocr paddle-ui
 `
 
-Open http://localhost:5000 in your browser.
+Open http://localhost:7860 in your browser.
 
 > **Note**: First run will download PaddleOCR models (~500MB). Models are persisted in a Docker volume.
 
